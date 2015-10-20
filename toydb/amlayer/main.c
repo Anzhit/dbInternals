@@ -1,6 +1,7 @@
 /* test3.c: tests deletion and scan. */
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 // #include <stdlib.h>
 
 #include "am.h"
@@ -10,7 +11,24 @@
 #define MAXRECS	10000	/* max # of records to insert */
 #define FNAME_LENGTH 80	/* file name size */
 
-void file_load(int fd, char* filename){
+void file_load_sort(int fd, char* filename){
+	char cmd[] = "sort -f ";
+	strcat(cmd, filename);
+	strcat(cmd, " > temp");
+	system(cmd);
+
+	FILE *fp;
+	int temp;
+	fp = fopen("temp", "r");
+	while(!feof(fp)){
+		fscanf(fp, "%d", &temp);
+		AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&temp,
+				temp);
+	}
+
+}
+
+void file_load_nosort(int fd, char* filename){
 	FILE *fp;
 	int temp;
 	fp = fopen(filename, "r");
@@ -19,7 +37,6 @@ void file_load(int fd, char* filename){
 		AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&temp,
 				temp);
 	}
-
 }
 
 main()
@@ -31,6 +48,7 @@ int sd;	/* scan descriptor */
 int numrec;	/* # of records retrieved */
 int testval;
 
+	clock_t start, end;
 
 	/* init */
 	printf("initializing\n");
@@ -46,9 +64,14 @@ int testval;
 	fd = PF_OpenFile(fname);
 
 	/* first, make sure that simple deletions work */
+	start = clock();
 	srand(time(NULL));
 	printf("inserting into index\n");
-	file_load(fd, "a.txt");
+	file_load_sort(fd, "a.txt");
+
+	end = clock();
+
+	printf("total time %f \n",((double)(end - start) / CLOCKS_PER_SEC));
 	// for (recnum=0; recnum < 2000000; recnum++){
 	// 	int r = rand();
 	// 	AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&r,
@@ -165,8 +188,8 @@ int testval;
 
 	/* destroy everything */
 	printf("closing down\n");
-	// PF_CloseFile(fd);
-		// AM_DestroyIndex(RELNAME,0);
+	PF_CloseFile(fd);
+		AM_DestroyIndex(RELNAME,0);
 
 	printf("test3 done!\n");
 }
