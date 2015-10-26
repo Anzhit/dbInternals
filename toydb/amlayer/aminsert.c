@@ -21,7 +21,7 @@ int status;/* Whether key is a new key or an old key */
 	/* initialise the header */
 	header = &head;
 	bcopy(pageBuf,header,AM_sl);
-
+	// printf("Random: %s\n", header);
 	recSize = attrLength + AM_ss;
 	if (status == AM_FOUND)
 		/* key is already present */ 
@@ -65,7 +65,7 @@ int status;/* Whether key is a new key or an old key */
 	    header->keyPtr) > (recSize + AM_si + AM_ss))
 	/*there is enough space in the freelist and in the middle put together */
 	{
-		/* Compact the freelist so that we get enough space in the middle                   so that the new key can be inserted */
+		/* Compact the freelist so that we get enough space in the middle so that the new key can be inserted */
 		AM_Compact(1,header->numKeys,pageBuf,tempPage,header);
 		
 		bcopy(tempPage,pageBuf,PF_PAGE_SIZE);
@@ -92,7 +92,7 @@ AM_LEAFHEADER *header;
 	int recSize;
 	short tempPtr;
 	short oldhead;
-
+	// printf("freeListPtr: %d\n", header->freeListPtr);
 	recSize = header->attrLength + AM_ss;
 	if ((header->freeListPtr) == 0)
 	{
@@ -132,6 +132,7 @@ int index;
 AM_LEAFHEADER *header;
 
 {
+	// printf("In here\n");
 	int recSize;
 	short null = AM_NULL;
 	int i;

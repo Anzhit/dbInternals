@@ -2,17 +2,17 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-// #include <stdlib.h>
+#include "helper.c"
 
-#include "am.h"
-#include "pf.h"
+// #include "am.h"
+// #include "pf.h"
 #include "testam.h"
 
 #define MAXRECS	10000	/* max # of records to insert */
 #define FNAME_LENGTH 80	/* file name size */
 
 void file_load_sort(int fd, char* filename){
-	char cmd[] = "sort -f ";
+	char cmd[] = "sort -f -n ";
 	strcat(cmd, filename);
 	strcat(cmd, " > temp");
 	system(cmd);
@@ -24,8 +24,40 @@ void file_load_sort(int fd, char* filename){
 		fscanf(fp, "%d", &temp);
 		AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&temp,
 				temp);
+
 	}
 
+	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LESS_THAN,NULL);
+	int numrec = 0, recnum;
+	while((recnum=AM_FindNextEntry(sd))>= 0){
+		printf("%d\n",recnum);
+		numrec++;
+	}
+
+}
+
+void create_leaf_layer(int fd, char* filename){
+	int count = 0;
+	
+	char cmd[] = "sort -f -n ";
+	strcat(cmd, filename);
+	strcat(cmd, " > temp");
+	system(cmd);
+
+	FILE *fp;
+	int temp;
+	fp = fopen("temp", "r");
+	
+	// allocate memory to these
+	int *rightmostPage;
+	char **rightmostBuf;
+	int length = 1;
+
+	while(!feof(fp)){
+		fscanf(fp, "%d", &temp);
+		InsertData(fd, INT_TYPE, sizeof(int),(char *)&temp, temp, rightmostPage, rightmostBuf, &length);
+		count++;
+	}
 }
 
 void file_load_nosort(int fd, char* filename){
@@ -36,6 +68,13 @@ void file_load_nosort(int fd, char* filename){
 		fscanf(fp, "%d", &temp);
 		AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&temp,
 				temp);
+	}
+
+	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LESS_THAN,NULL);
+	int numrec = 0, recnum;
+	while((recnum=AM_FindNextEntry(sd))>= 0){
+		printf("%d\n",recnum);
+		numrec++;
 	}
 }
 
@@ -67,11 +106,13 @@ int testval;
 	start = clock();
 	srand(time(NULL));
 	printf("inserting into index\n");
-	file_load_sort(fd, "a.txt");
+	// file_load_sort(fd, "a.txt");
+	create_leaf_layer(fd, "a.txt");
 
 	end = clock();
 
 	printf("total time %f \n",((double)(end - start) / CLOCKS_PER_SEC));
+
 	// for (recnum=0; recnum < 2000000; recnum++){
 	// 	int r = rand();
 	// 	AM_InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&r,

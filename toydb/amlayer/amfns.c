@@ -3,7 +3,6 @@
 # include "am.h"
 
 
-
 /* Creates a secondary idex file called fileName.indexNo */
 AM_CreateIndex(fileName,indexNo,attrType,attrLength)
 char *fileName;/* Name of indexed file */
@@ -243,6 +242,7 @@ int recId; /* id of the record to delete */
 
 
 
+
 /* Inserts a value,recId pair into the tree */
 AM_InsertEntry(fileDesc,attrType,attrLength,value,recId)
 int fileDesc; /* file Descriptor */
@@ -287,8 +287,6 @@ int recId; /* recId to be inserted */
 	/* Search the leaf for the key */
 	status = AM_Search(fileDesc,attrType,attrLength,value,&pageNum,
 			   &pageBuf,&index);
-
-
 	
 	/* check if there is an error */
 	if (status < 0) 
