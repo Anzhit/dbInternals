@@ -1,0 +1,5 @@
+To run the test for bulk loading, follow these steps inside amlayer folder:
+
+1) make clean
+2) make bulk_loading.out
+3) ./bulk_loading.out

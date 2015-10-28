@@ -19,7 +19,7 @@ int *length;
 	int status; /* whether key is old or new */
 	int inserted; /* Whether key has been inserted into the leaf or a new node is needed */
 	int errVal;
-
+	pageBuf=rightmostBuf[*length-1];
 	/* check the parameters */
 	if ((attrType != 'c') && (attrType != 'f') && (attrType != 'i')){
 		AM_Errno = AME_INVALIDATTRTYPE;
@@ -68,7 +68,7 @@ int *length;
 		rightmostBuf[0] = newPageBuf;
 		
 		InsertIntoLeaf(newPageBuf, value, recId);
-		
+		PF_UnfixPage(fileDesc, pageNum, TRUE);
 		AddToParent(fileDesc, 0, rightmostPage, rightmostBuf, value, attrLength, length);
 	}
 	
@@ -85,14 +85,34 @@ char **rightmost_buf;/*Array which stores the buffer pointer of right most node 
 char *value; /* pointer to attribute value to be added*/
 int attrLength;/* 4 for ’i’ or ’f’, 1-255 for ’c’ */
 int *length;/*Length of rightmost_page and rightmost_buf arrays*/
-{
+{	
 
 	if((*length) == level + 1){
-		(*length)++;
-		// rightmost_page[(*length)] = ;
-		// rightmost_buf[(*length)] = ;
-	}
 
+		char *newPageBuf;
+		int newPageNum;
+		PF_AllocPage(fileDesc, &newPageNum, &newPageBuf);
+		rightmost_page[(*length)] =newPageNum ;
+		rightmost_buf[(*length)] = newPageBuf;
+		(*length)++;
+	}
+	char* parent=rightmost_buf[level+1];
+	AM_LEAFHEADER *header;
+	bcopy(parent, header, AM_sl);
+	if(header->recIdPtr - header->keyPtr >= AM_si + AM_ss + recSize){
+		//AM_si may hugg
+		header->keyPtr = header->keyPtr + AM_si;
+
+		// add the new key
+		bcopy(value, parent + AM_sl + header->numKeys*recSize, header->attrLength);
+
+		/* make the head of list NULL*/
+		//bcopy((char *)&null,pageBuf+AM_sl+(index-1)*recSize+header->attrLength,AM_ss);
+
+		header->numKeys++;
+		bcopy(header, pageBuf, AM_sl);
+
+	}
 
 
 }

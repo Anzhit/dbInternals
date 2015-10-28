@@ -1,0 +1,57 @@
+5,3
+
+number of keys=200
+buffer size=20
+test done!
+Statistics  
+Number of nodes created = 81
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 82
+Number of Write Transfers = 84
+Time=2 ms
+
+
+number of keys=1000
+buffer size=20
+test done!
+Statistics  
+Number of nodes created = 403
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 404
+Number of Write Transfers = 406
+Time=3 ms
+
+test done!
+Statistics
+number of keys=1000
+buffer size= 6 
+Number of nodes created = 403
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 404
+Number of Write Transfers = 406
+time=3 ms
+
+number of keys=1000
+buffer size=30
+test done!
+Statistics  
+Number of nodes created = 403
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 404
+Number of Write Transfers = 406
+time=3 ms
+
+number of keys=10000
+buffer size=10
+test done!
+Statistics  
+Number of nodes created = 4003
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 4004
+Number of Write Transfers = 4006
+time=22 ms
