@@ -86,33 +86,117 @@ char *value; /* pointer to attribute value to be added*/
 int attrLength;/* 4 for ’i’ or ’f’, 1-255 for ’c’ */
 int *length;/*Length of rightmost_page and rightmost_buf arrays*/
 {	
+	// /*Node has no parent*/
+	// if((*length) == level + 1){
+	// 	char *newPageBuf;
+	// 	int newPageNum;
+	// 	errVal = PF_AllocPage(fileDesc, &newPageNum, &newPageBuf);
+	// 	AM_Check;
+	// 	rightmost_page[(*length)] = newPageNum ;
+	// 	rightmost_buf[(*length)] = newPageBuf;
+	// 	(*length)++;
+	// }
 
-	if((*length) == level + 1){
+    int errVal;
 
-		char *newPageBuf;
+	/*Page number of page to be added*/
+	int pageNum = rightmost_page[level];
+	/*Page number of parent page to which pageNum has to be added*/
+	int parentPageNum = rightmost_page[level+1];
+	/*Page buffer of parent page*/
+	char* parentPageBuf = rightmost_buf[level+1];
+	AM_INTHEADER head, *header;
+
+	/*Initialise header */
+	header = &head;
+
+	/* copy the header from buffer */
+	bcopy(parentPageBuf, header, AM_sint);
+	int recSize = header->attrLength + AM_si;
+
+	if(header->numKeys < header->maxKeys){
+		AM_AddtoIntPage(parentPageBuf, value, pageNum, header, header->numKeys);
+		/*copy updated header to parentPageBuf*/
+		bcopy(header, parentPageBuf, AM_sint);
+		// NEXT LINE PROBABLY NOT REQUIRED 
+		// rightmost_buf[level+1] = parentPageBuf;
+		return (AME_OK);
+	}
+	else{
 		int newPageNum;
-		PF_AllocPage(fileDesc, &newPageNum, &newPageBuf);
-		rightmost_page[(*length)] =newPageNum ;
-		rightmost_buf[(*length)] = newPageBuf;
-		(*length)++;
+		char* newPageBuf;
+		errVal = PF_AllocPage(fileDesc, &newPageNum, &newPageBuf);
+		AM_Check; //check if there is no error in the PF layer functionality
+		AM_INTHEADER newhead, *newheader;
+		newheader = &newhead;
+
+
+		//NOTE: INCREMENT NUMBER OF NODES, IF MAINTAINED HERE
+		
+		/*Initialise newheader*/
+		newheader->pageType = header->pageType;
+        newheader->attrLength = header->attrLength;
+        newheader->maxKeys = header->maxKeys;
+        newheader->numKeys = 0;
+        bcopy(newheader, newPageBuf, AM_sint);
+
+        /*Right most key of parentPageBuf has to be deleted and put into the next node*/
+        header->numKeys = header->numKeys - 1;
+        bcopy(header, parentPageBuf, AM_sint);
+        /*For putting the correct pointer (of the lower level node) into the new node on the right*/
+        bcopy(parentPageBuf + AM_sint + recSize*(header->numKeys + 1), newPageBuf + AM_sint, AM_si); //NOTE: recSize not initialised
+        /*Add value to this newly created parent*/
+        AM_AddtoIntPage(newPageBuf, value, parentPageNum, newheader, newheader->numKeys);
+        bcopy(newheader, newPageBuf, AM_sint);
+
+       //  /*value of key to be added to parent, i.e., value of rightmost key in left node*/
+      	// char* val = (char*)malloc(header->attrLength);
+      	// bcopy(parentPageBuf + AM_sint + (header->numKeys)*recSize + AM_si, val, header->attrLength);  
+        	
+
+        if(parentPageNum == AM_RootPageNum){ // If a new root needs to be created
+        	/*Allocate new root page*/
+        	int newRootNum;
+        	char* newRootBuf;
+        	errVal = PF_AllocPage(fileDesc, &newRootNum, &newRootBuf);
+        	AM_Check;
+
+        	//NOTE: INCREMENT NUMBER OF NODES, IF MAINTAINED, HERE
+
+          	/*Fill in new root*/
+          	AM_FillRootPage(newRootBuf, parentPageNum, newPageNum, value, header->attrLength, header->maxKeys);
+
+        	/*Modiy rightmost buf and num arrays*/
+        	*length = *length + 1;
+
+        	rightmost_page[level+2] = AM_RootPageNum;
+        	rightmost_buf[level+2] = newRootBuf;
+
+        	/*level + 1 entries to be set to the newPageBuf and Num*/
+	    	rightmost_page[level+1] = newPageNum;
+	    	rightmost_buf[level+1] = newPageBuf;
+
+	    	/*Unfix left sibling of new page or left child of new root*/
+	    	errVal = PF_UnfixPage(fileDesc, parentPageNum, TRUE);
+	    	AM_Check;
+        }
+        else{
+        	/*level + 1 entries to be set to the newPageBuf and Num*/
+	    	rightmost_page[level+1] = newPageNum;
+	    	rightmost_buf[level+1] = newPageBuf;
+
+	    	/*Unfix left sibling of new page or left child of new root*/
+	    	errVal = PF_UnfixPage(fileDesc, parentPageNum, TRUE);
+	    	AM_Check;
+	    	
+	    	errVal = AddToParent(fileDesc, level+1, rightmost_page, rightmost_buf, value, attrLength, length);
+	    	AM_Check;	
+        }
+
+    	
+
 	}
-	char* parent=rightmost_buf[level+1];
-	AM_LEAFHEADER *header;
-	bcopy(parent, header, AM_sl);
-	if(header->recIdPtr - header->keyPtr >= AM_si + AM_ss + recSize){
-		//AM_si may hugg
-		header->keyPtr = header->keyPtr + AM_si;
-
-		// add the new key
-		bcopy(value, parent + AM_sl + header->numKeys*recSize, header->attrLength);
-
-		/* make the head of list NULL*/
-		//bcopy((char *)&null,pageBuf+AM_sl+(index-1)*recSize+header->attrLength,AM_ss);
-
-		header->numKeys++;
-		bcopy(header, pageBuf, AM_sl);
-
-	}
+	return (AME_OK);
 
 
 }
