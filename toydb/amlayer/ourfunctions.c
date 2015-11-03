@@ -123,3 +123,139 @@ int *length;/*Length of rightmost_page and rightmost_buf array*/
     }
     return (AME_OK);
 }
+InsertEntry(fileDesc,attrType,attrLength,value,recId,last,buff_hits,num_nodes,buff_access)
+int fileDesc; /* file Descriptor */
+char attrType; /* 'i' or 'c' or 'f' */
+int attrLength; /* 4 for 'i' or 'f', 1-255 for 'c' */
+char *value; /* value to be inserted */
+int recId; /* recId to be inserted */
+int last; /*Wheteher the value to be inserted is the last value*/
+int *buff_hits;
+int * num_nodes;
+int * buff_access;
+{   
+    char *pageBuf; /* buffer to hold page */
+    int pageNum; /* page number of the page in buffer */
+    int errVal; /* return value of functions within this function */
+    static char *rightmost_buf[100000];
+    static int rightmost_page[100000];
+    static int length=0;
+    if(length==0){
+        length++;
+        errVal=PF_GetFirstPage(fileDesc,&pageNum,&pageBuf,buff_hits);
+        AM_Check;
+        rightmost_page[0]=pageNum;
+        rightmost_buf[0]=pageBuf;
+    }
+    int isInserted= InsertintoLeaf(rightmost_buf[0],attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
+    if(isInserted==TRUE){
+        //done
+        if(last==1){
+            for(int i=0;i<length;i++)
+            {
+                errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
+                AM_Check;
+            }
+            if(print_check == 1)
+                Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
+        }
+    }
+    else if(isInserted==FALSE){
+
+        /* Create a new leafnode*/
+        char *tempPageBuf,*tempPageBuf1; /*Stores the buffer location of newly allocated page*/
+        int tempPageNum,tempPageNum1;/* Stores the page number of newly allocated page*/
+        AM_LEAFHEADER *tempheader;//To store the header of newly allocated page
+
+        errVal = PF_AllocPage(fileDesc,&tempPageNum,&tempPageBuf);
+        AM_Check;
+        (*num_nodes)++;
+        /*Initialize the header of new leafnode*/
+        tempheader=(AM_LEAFHEADER*)malloc(sizeof(AM_LEAFHEADER));
+        tempheader->pageType = 'l';
+        tempheader->numKeys = 0;
+        tempheader->numinfreeList = 0;
+        tempheader->nextLeafPage = AM_NULL_PAGE;
+        tempheader->recIdPtr = PF_PAGE_SIZE;
+        tempheader->keyPtr = AM_sl;
+        tempheader->freeListPtr = AM_NULL;
+        tempheader->attrLength = attrLength;
+        tempheader->maxKeys = (PF_PAGE_SIZE - AM_sint - AM_si)/(AM_si + attrLength);
+
+
+        /* copy the header onto the page */
+        bcopy(tempheader,tempPageBuf,AM_sl);
+        /* Make the next leaf page pointer of previous page point to the newly created page*/
+        bcopy(rightmost_buf[0],tempheader,AM_sl);
+        tempheader->nextLeafPage = tempPageNum;
+        bcopy(tempheader,rightmost_buf[0],AM_sl);
+
+        /*Insert the value to newly created leaf node*/
+        InsertintoLeaf(tempPageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
+
+        if(length==1)
+        {
+            //Allocate new page for root
+            errVal = PF_AllocPage(fileDesc,&tempPageNum1,&tempPageBuf1);
+            AM_Check;
+            //Assign global Vars 
+            AM_LeftPageNum = rightmost_page[0];
+            AM_RootPageNum=tempPageNum1;
+            //Init Root
+            AM_FillRootPage(tempPageBuf1,rightmost_page[0],tempPageNum,value,
+            tempheader->attrLength ,tempheader->maxKeys);
+            length++;
+            (*num_nodes)++;
+            /*unfix the left most leaf node*/
+            errVal = PF_UnfixPage(fileDesc,AM_LeftPageNum,TRUE);
+            AM_Check;
+            //Assign new leaf to rightmost[0], root to rightmost[1]
+            rightmost_page[0]=tempPageNum;
+            rightmost_buf[0]=tempPageBuf;
+            rightmost_page[1]=tempPageNum1;
+            rightmost_buf[1]=tempPageBuf1;
+            if(last==1)
+            {   
+                //Unfix all pages
+                for(int i=0;i<length;i++)
+                {
+                    errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
+                    AM_Check;
+                }
+                if(print_check == 1)
+                    Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
+                AM_EmptyStack();
+                return(AME_OK);
+            }
+        }
+        else
+        {
+            //Root node already present
+            errVal = PF_UnfixPage(fileDesc,rightmost_page[0],TRUE);
+            AM_Check;
+            rightmost_page[0]=tempPageNum;
+            rightmost_buf[0]=tempPageBuf;
+            errVal=AddtoParent(fileDesc,0,rightmost_page,rightmost_buf,value,attrLength,&length,buff_hits,num_nodes,buff_access);
+
+            if(last==1)
+            {
+                //TODO Redistribute
+                for(int i=0;i<length;i++)
+                {
+                    errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
+                    AM_Check;
+                }
+                if(print_check == 1)
+                    Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
+            }
+        }
+    }
+    if (errVal < 0)
+    {
+        AM_EmptyStack();
+        AM_Errno = errVal;
+        return(errVal);
+    }
+    AM_EmptyStack();
+    return(AME_OK);
+}
