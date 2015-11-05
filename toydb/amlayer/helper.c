@@ -201,34 +201,122 @@ int *length;/*Length of rightmost_page and rightmost_buf arrays*/
 
 }
 
-InsertIntoLeaf(pageBuf, value, recId)
+// Pradyot Prakash ka function
+InsertintoLeaf(pageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access)
 char *pageBuf;/* buffer where the leaf page resides */
+int attrLength;
+char attrType;
 char *value;/* attribute value to be inserted*/
 int recId;/* recid of the attribute to be inserted */
+int *buff_hits;
+int * num_nodes;
+int * buff_access;
 {
-	AM_LEAFHEADER *header;
+
+	int recSize, numElts, attributeLength;
+	AM_LEAFHEADER *header, head;
+
 	bcopy(pageBuf, header, AM_sl);
+	attributeLength = header->attrLength;
+	recSize = attributeLength + AM_ss;
+	numElts = header->numKeys;
+	header = &head;
 
-	int recSize;
+	// inserting the first element
+	if(!numElts){
+		// assume that space is available since it's the first element
 
-	recSize = header->attrLength + AM_ss;
-
-	if(header->recIdPtr - header->keyPtr < AM_si + AM_ss + recSize){
-		return FALSE;
-	}
-	else{
+		bcopy(pageBuf, header, AM_sl);
+		short recordIdPtr;
 
 		header->keyPtr = header->keyPtr + recSize;
+		header->numKeys = header->numKeys + 1;
 
-		// add the new key
-		bcopy(value, pageBuf + AM_sl + header->numKeys*recSize, header->attrLength);
+		// insert the key value into the node
+		int offset = pageBuf + AM_sl + numElts*recSize;
+		bcopy(value, offset, attributeLength);
 
-		/* make the head of list NULL*/
-		//bcopy((char *)&null,pageBuf+AM_sl+(index-1)*recSize+header->attrLength,AM_ss);
+		recordIdPtr = header->recIdPtr - AM_si;
+		header->recIdPtr = recordIdPtr;
 
-		header->numKeys++;
+		bcopy((char*)&recordIdPtr, offset + attributeLength, AM_ss);
+
+		bcopy((char*) recId, pageBuf + recordIdPtr, AM_si);
+
 		bcopy(header, pageBuf, AM_sl);
-		return TRUE;
+
+		return TRUE;	
+
+	}
+
+	else{
+		// space may or may not be available
+		// int present = 0;
+		// // AM_Search(fileDesc, attrType,attrLength,value,&pageNum,&pageBuf,&index);
+		// // use AM_Search here
+		
+		// // check if key is present
+		// if(present){
+			
+		// 	if(header->recIdPtr - header->keyPtr < AM_si){
+		// 		return FALSE;
+		// 	}
+		// 	else{
+		// 		// code I do not understand
+				
+		// 		bcopy(pageBuf, header, AM_sl);
+		// 		short recordIdPtr;
+
+		// 		header->keyPtr = header->keyPtr + recSize;
+		// 		header->numKeys = header->numKeys + 1;
+
+		// 		// insert the key value into the node
+		// 		int offset = pageBuf + AM_sl + numElts*recSize;
+		// 		bcopy(value, offset, attributeLength);
+
+		// 		recordIdPtr = header->recIdPtr - AM_si;
+		// 		header->recIdPtr = recordIdPtr;
+
+		// 		bcopy((char*)&recordIdPtr, offset + attributeLength, AM_ss);
+
+		// 		bcopy((char*) recId, pageBuf + recordIdPtr, AM_si);
+
+		// 		bcopy(header, pageBuf, AM_sl);
+
+		// 		return TRUE;
+		// 	}
+
+		// }
+		// else{
+
+			if(header->recIdPtr - header->keyPtr < AM_si + recSize){
+				return FALSE;
+			}
+			else{
+				// space is available
+				bcopy(pageBuf, header, AM_sl);
+				short recordIdPtr;
+
+				header->keyPtr = header->keyPtr + recSize;
+				header->numKeys = header->numKeys + 1;
+
+				// insert the key value into the node
+				int offset = pageBuf + AM_sl + numElts*recSize;
+				bcopy(value, offset, attributeLength);
+
+				recordIdPtr = header->recIdPtr - AM_si;
+				header->recIdPtr = recordIdPtr;
+
+				bcopy((char*)&recordIdPtr, offset + attributeLength, AM_ss);
+
+				bcopy((char*) recId, pageBuf + recordIdPtr, AM_si);
+
+				bcopy(header, pageBuf, AM_sl);
+
+				return TRUE;
+
+			}
+		//}
 	}
 
 }
