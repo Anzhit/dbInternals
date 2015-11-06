@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include "helper.c"
+// #include "helper.c"
 
 // #include "am.h"
 // #include "pf.h"
@@ -27,7 +27,7 @@ void file_load_sort(int fd, char* filename){
 
 	}
 
-	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LESS_THAN,NULL);
+	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LT_OP,NULL);
 	int numrec = 0, recnum;
 	while((recnum=AM_FindNextEntry(sd))>= 0){
 		printf("%d\n",recnum);
@@ -36,29 +36,29 @@ void file_load_sort(int fd, char* filename){
 
 }
 
-void create_leaf_layer(int fd, char* filename){
-	int count = 0;
+// void create_leaf_layer(int fd, char* filename){
+// 	int count = 0;
 	
-	char cmd[] = "sort -f -n ";
-	strcat(cmd, filename);
-	strcat(cmd, " > temp");
-	system(cmd);
+// 	char cmd[] = "sort -f -n ";
+// 	strcat(cmd, filename);
+// 	strcat(cmd, " > temp");
+// 	system(cmd);
 
-	FILE *fp;
-	int temp;
-	fp = fopen("temp", "r");
+// 	FILE *fp;
+// 	int temp;
+// 	fp = fopen("temp", "r");
 	
-	// allocate memory to these
-	int *rightmostPage;
-	char **rightmostBuf;
-	int length = 1;
+// 	// allocate memory to these
+// 	int *rightmostPage;
+// 	char **rightmostBuf;
+// 	int length = 1;
 
-	while(!feof(fp)){
-		fscanf(fp, "%d", &temp);
-		InsertData(fd, INT_TYPE, sizeof(int),(char *)&temp, temp, rightmostPage, rightmostBuf, &length);
-		count++;
-	}
-}
+// 	while(!feof(fp)){
+// 		fscanf(fp, "%d", &temp);
+// 		InsertData(fd, INT_TYPE, sizeof(int),(char *)&temp, temp, rightmostPage, rightmostBuf, &length);
+// 		count++;
+// 	}
+// }
 
 void file_load_nosort(int fd, char* filename){
 	FILE *fp;
@@ -70,7 +70,7 @@ void file_load_nosort(int fd, char* filename){
 				temp);
 	}
 
-	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LESS_THAN,NULL);
+	int sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),LT_OP,NULL);
 	int numrec = 0, recnum;
 	while((recnum=AM_FindNextEntry(sd))>= 0){
 		printf("%d\n",recnum);
@@ -106,8 +106,8 @@ int testval;
 	start = clock();
 	srand(time(NULL));
 	printf("inserting into index\n");
-	// file_load_sort(fd, "a.txt");
-	create_leaf_layer(fd, "a.txt");
+	file_load_sort(fd, "a.txt");
+	// create_leaf_layer(fd, "a.txt");
 
 	end = clock();
 
