@@ -2,18 +2,127 @@
 # include "pf.h"
 # include "am.h"
 #include "testam.h"
+// #include <stdlib.h>
+// #include "amprint1.c"
 
 //if print_check is 1 print the tree else do not
-int print_check =0;
+int print_check =1;
 
-typedef struct am_bagheader{
-	short numKeys;
-	short lastPtr;
-	short nextPageNum;
-}	AM_BAGHEADER ; 
-
-# define AM_sb sizeof(AM_BAGHEADER)
-
+/* Inserts a key into a leaf node */
+InsertintoLeaf1(fd,l,pageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access)
+int fd;
+int *l;
+char *pageBuf;/* buffer where the leaf page resides */
+int attrLength;
+char attrType;
+char *value;/* attribute value to be inserted*/
+int recId;/* recid of the attribute to be inserted */
+int *buff_hits;
+int * num_nodes;
+int * buff_access;
+{
+	 int recSize;
+	 char tempPage[PF_PAGE_SIZE];
+	 AM_LEAFHEADER head,*header;
+	 int errVal;
+	 int high;
+	 int compareVal; /* result of comparison of key with value */
+	 int index; /*index where key is to be inserted*/
+	 short tempPtr;
+	 short oldhead;
+	 //printf("Insert into leaf called");
+	 /* initialise the header */
+	 header = &head;
+	 bcopy(pageBuf,(char*) header,AM_sl);
+	 ////////
+	 high = header->numKeys;
+	 index=high+1;
+	 recSize = header->attrLength + AM_ss;
+	 /* The leaf is Empty */
+	 if (high == 0)
+	 {
+	 	printf("%d\n", header->recIdPtr);
+		 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
+		 tempPtr = header->recIdPtr;
+		 recSize = header->attrLength + AM_ss;
+		 /* Update the header */
+		 header->keyPtr = header->keyPtr + recSize;
+		 /* copy the new key */
+		 bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
+		 /* Set the head of recId list to the new recid to be added */
+		 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
+		 header->attrLength,AM_ss);
+		 /* Copy the recId*/
+		 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
+		 header->numKeys++;
+		 bcopy((char*) header,pageBuf,AM_sl);
+		 return(TRUE);
+	 }
+	 else
+	 {
+		 /* compare value with the last inserted key */
+		 compareVal = AM_Compare(pageBuf + AM_sl + (high - 1)*recSize,
+		 attrType,attrLength,value);
+		 if(compareVal==0)
+		 {
+			 /* key is already present */
+			 if ((header->recIdPtr - header->keyPtr) <(AM_si + AM_ss))
+			 {
+				 /* no room for one more record */
+				 //printf("no space in leaf\n");
+				 return(FALSE);
+			 }
+			 else
+			 {
+				 recSize = header->attrLength + AM_ss;
+				 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
+				 tempPtr = header->recIdPtr;
+				 /* save  the old head of recId list */
+				 bcopy(pageBuf+AM_sl+(index-1)*recSize + header->attrLength,
+				 (char *)&oldhead, AM_ss);
+				 /* Update the head of recId list to the new recid to be added */
+				 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
+				 header->attrLength,AM_ss);
+				 /* Copy the recId*/
+				 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
+				 /* make the old head of list the second on list */
+				 bcopy((char *)&oldhead,pageBuf + tempPtr+AM_si,AM_ss);
+				 bcopy((char*) header,pageBuf,AM_sl);
+				 return (TRUE);
+			 }
+		 }
+		 else
+		 {
+			 /*key is not already present */
+			 if ((header->recIdPtr - header->keyPtr) < (AM_si + AM_ss + recSize))
+			 {
+				 //No space available
+				 return(FALSE);
+			 }
+			 else
+			 {
+				 //Space is available
+				 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
+				 tempPtr = header->recIdPtr;
+				 recSize = header->attrLength + AM_ss;
+				 /* Update the header */
+				 header->keyPtr = header->keyPtr + recSize;
+				 /* copy the new key */
+				 bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
+				 /* Set the head of recId list to the new recid to be added */
+				 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
+				 header->attrLength,AM_ss);
+				 /* Copy the recId*/
+				 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
+				 header->numKeys++;
+				 //printf("recid added is %d \n",recId);
+				 bcopy((char*) header,pageBuf,AM_sl);
+				 return(TRUE);
+			 }
+		 }
+	 }
+	 ////////
+}
 
 InsertintoLeaf(fd,bagPage,pageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access)
 int fd; // file descriptor
@@ -34,7 +143,7 @@ int * buff_access;
 	bcopy(pageBuf, (char*)header, AM_sl);
 
 	attributeLength = header->attrLength;
-	recSize = attributeLength + AM_si + AM_si + AM_ss; // value, pagenum, pointer within page, single or multiple
+	recSize = attributeLength + AM_si + AM_si + AM_ss; // value, single or multiple, pagenum, pointer within page
 	numElts = header->numKeys;
 	int ptr, lastAddressinBag;
 
@@ -42,22 +151,23 @@ int * buff_access;
 	if(numElts == 0){
 		// assume that space is available since it's the first element
 		
-		bcopy(pageBuf, (char*)header, AM_sl);
 		
 		header->keyPtr = header->keyPtr + recSize;
 		header->numKeys = 1;
 
 		// insert the key value into the node
 		bcopy(value, pageBuf + AM_sl, attributeLength);
-
+printf("Omega1 %s\n", value);
 		//for now point to some random location as key = record value
-		ptr = -1;
+		ptr = 18;
+		
 		bcopy((char*)&ptr, pageBuf + AM_sl + attributeLength, AM_si);
 		// ptr = address of entry
 		bcopy((char*)&ptr, pageBuf + AM_sl + attributeLength + AM_si, AM_si);
-		short single = 1;
-		bcopy((char*)&single, pageBuf + AM_sl + attributeLength + AM_si*2, AM_ss);
 		
+		short single = 1;
+		bcopy((char*)&single, pageBuf + AM_sl + attributeLength + 2*AM_si, AM_ss);
+
 		// write the header back onto the page
 		bcopy((char*)header, pageBuf, AM_sl);
 
@@ -65,51 +175,53 @@ int * buff_access;
 	}
 	// some elements already exist
 	else{
+		printf("Omega2 %s\n", value);
 
-		bcopy(pageBuf, (char*)header, AM_sl);
+		// bcopy(pageBuf, (char*)header, AM_sl);
 		
 		// get last element inserted
-		char lastVal[AM_si], lastToLastVal[AM_si];
+		char lastVal[AM_si];
 		
-		bcopy((char*)(pageBuf + AM_sl + (numElts-1)*recSize), lastVal, attributeLength);
+		bcopy((char*)(pageBuf + AM_sl + numElts*recSize), lastVal, attributeLength);
 		
 		int present = strcmp(value, lastVal);
-		
+		printf("Lastval %d %s\n",present, lastVal);
 		// check if key is present
 		if(present == 0){
 			// yes, present
-			
+			// printf("Mogambo\n");
 			short single;
-			bcopy((char*)(pageBuf + AM_sl + (numElts-1)*recSize + 2*AM_si), &single, AM_ss);
-			int flag = 0;
+			bcopy((char*)(pageBuf + AM_sl + numElts*recSize + attributeLength + 2*AM_si), &single, AM_ss);
+			
 			if(single == 0){
-				flag = 1;
-			}
-
-			if(flag){
 				// at least two similar values exist, no need to initialize stuff
 				
 				AM_BAGHEADER *bagHeader, bagHead;
 				bagHeader = &bagHead;
 
 				char tempBuf[PF_PAGE_SIZE];
-				int pntr, bagPageNum, lastAddressinBag;
+				int pntr, bagPageNum, lastAddressinPage;
 
 				// get the starting address within the correct page where the bag header resides
-				bcopy((char*)(pageBuf + AM_sl + (numElts-1)*recSize + attributeLength), (char*)&bagPageNum, AM_si);
-				bcopy((char*)(pageBuf + AM_sl + (numElts-1)*recSize + attributeLength + AM_si), (char*)&pntr, AM_si);
+				bcopy((char*)(pageBuf + AM_sl + numElts*recSize + attributeLength), (char*)&bagPageNum, AM_si);
+				bcopy((char*)(pageBuf + AM_sl + numElts*recSize + attributeLength + AM_si), (char*)&pntr, AM_si);
 
 				PF_GetThisPage(fd, bagPageNum, &tempBuf, buff_hits);
-				bcopy(pageBuf, &lastAddressinBag, AM_si);
+				bcopy(pageBuf, &lastAddressinPage, AM_si);
 				bcopy(tempBuf + pntr, (char*)bagHeader, AM_sb);
 
 				// check if space is available in this node
-				if(PF_PAGE_SIZE - lastAddressinBag > AM_si){
+				if(PF_PAGE_SIZE - lastAddressinPage > AM_si){
 					// add to the remaining elements
+		// printf("Mogambo\n");
 					bagHeader->numKeys++;
 					bcopy((char*)&ptr, (char*)bagHeader->lastPtr, AM_si);
+		// printf("Mogambo\n");
 					bagHeader->lastPtr += AM_si;
-					bcopy((char*)bagHeader, tempBuf + AM_si + pntr, AM_sb);	
+					lastAddressinPage += AM_si;
+
+					bcopy((char*)lastAddressinPage, tempBuf, AM_si);	
+					bcopy((char*)bagHeader, tempBuf + pntr, AM_sb);	
 
 					return TRUE;				
 				}
@@ -123,7 +235,7 @@ int * buff_access;
 					PF_AllocPage(fd, &bagPageNum, &tempBuf1);
 					*bagPage = bagPageNum;
 					bagHeader->nextPageNum = bagPageNum;
-					bcopy((char*)bagHeader, tempBuf + AM_si + pntr, AM_sb);
+					bcopy((char*)bagHeader, tempBuf + pntr, AM_sb);
 
 					int s = AM_si + AM_sb + AM_si;
 					bcopy((char*)&s, tempBuf1, AM_si);
@@ -133,7 +245,8 @@ int * buff_access;
 					bagHeader1->numKeys = 1;
 					bagHeader1->nextPageNum = -1;
 					bagHeader1->lastPtr = s;
-
+					
+					bcopy((char*)&ptr, (char*)(s - AM_si), AM_si);
 					bcopy((char*)bagHeader1, tempBuf1 + AM_si, AM_sb);
 
 					return TRUE;
@@ -142,16 +255,16 @@ int * buff_access;
 			}
 			else{
 				// second copy of the last value,
-				// need to create a new header to store the pointers
+				// need to create a new header and bag to store the pointers
 								
 				char tempBuf[PF_PAGE_SIZE];
-				int pntr, lastAddressinBag;
+				int pntr, lastAddressinPage;
 				PF_GetThisPage(fd, *bagPage, &tempBuf, buff_hits);
 
 				// check is space is available in the page
-				bcopy(tempBuf, &lastAddressinBag, AM_si);
+				bcopy(tempBuf, &lastAddressinPage, AM_si);
 				
-				if(PF_PAGE_SIZE - lastAddressinBag < AM_sb + AM_si*2){
+				if(PF_PAGE_SIZE - lastAddressinPage < AM_sb + AM_si*2){
 
 					// no space
 					// allocate a new page and write stuff to it
@@ -163,49 +276,72 @@ int * buff_access;
 					PF_AllocPage(fd, &bagPageNum, &tempBuf1);
 					*bagPage = bagPageNum;
 					
-					int s = AM_si + AM_sb + AM_si*2;
-					bcopy((char*)&s, tempBuf1, AM_si);
+					int pntr = AM_si + AM_sb + AM_si*2;
+					bcopy((char*)&pntr, tempBuf1, AM_si);
 					
 					bagHeader1 = &bagHead1;
 
 					bagHeader1->numKeys = 2;
 					bagHeader1->nextPageNum = -1;
-					bagHeader1->lastPtr = s;
+					bagHeader1->lastPtr = pntr;
 
-					bcopy((char*)bagHeader1, tempBuf1 + pntr, AM_sb);
+					int address1;
+					// get the original address from the leaf node
+					bcopy(pageBuf + AM_sl + numElts * recSize + attributeLength + AM_ss, &address1, AM_si);
+					
+					// update that value
+					bcopy((char*)&bagPageNum, pageBuf + AM_sl + numElts*recSize + attributeLength, AM_si);
+					bcopy((char*)&pntr, pageBuf + AM_sl + numElts*recSize + attributeLength + AM_si, AM_si);
+					short single1 = 0;
+					bcopy((char*)&single1, pageBuf + AM_sl + numElts*recSize + attributeLength + 2*AM_si, AM_ss);
+
+					// write values into tempBuf1
+					bcopy((char*)&pntr, tempBuf1, AM_si);
+					bcopy((char*)bagHeader1, tempBuf1 + AM_si, AM_sb);
+					bcopy((char*)&address1, tempBuf1 + AM_si + AM_sb, AM_si);
+					bcopy((char*)&ptr, tempBuf1 + AM_si + AM_sb + AM_si, AM_si);
 
 					return TRUE;
-
 				}
 				else{
 
-					// space available
-					AM_BAGHEADER bagHead, *bagHeader;
-					bagHeader = &bagHead;
-					
-					bagHeader->numKeys = 2;
-					bagHeader->nextPageNum = -1;
-					bagHeader->lastPtr = lastAddressinBag + AM_sb + AM_si*2;;
-					bcopy((char*)bagHeader, tempBuf + lastAddressinBag, AM_sb);
-					
-					// copy the two pointers
-					// bcopy();
-					// bcopy();
-					short v = 0;
-					int bagPageNum;
-					// copy the address in the original node
-					bcopy((char*)&bagPageNum, pageBuf + AM_sl + (numElts-1)*recSize + attributeLength, AM_si);
-					bcopy((char*)&lastAddressinBag, pageBuf + AM_sl + (numElts-1)*recSize + attributeLength + AM_si, AM_si);
-					bcopy((char*)&v, pageBuf + AM_sl + (numElts-1)*recSize + attributeLength + AM_si*2, AM_ss);
+					char tempBuf1[PF_PAGE_SIZE];
+					PF_GetThisPage(fd, *bagPage, &tempBuf1, buff_hits);
 
-					lastAddressinBag += AM_sb + AM_si*2; // one for each pointer
-					bcopy((char*)&lastAddressinBag, tempBuf, AM_si);
+					// space available
+					AM_BAGHEADER bagHead1, *bagHeader1;
+					bagHeader1 = &bagHead1;
+					
+					bagHeader1->numKeys = 2;
+					bagHeader1->nextPageNum = -1;
+					bagHeader1->lastPtr = lastAddressinPage + AM_sb + AM_si*2;
+
+					bcopy((char*)bagHeader1, tempBuf + lastAddressinPage, AM_sb);
+					
+					int address1, pntr;
+					pntr = lastAddressinPage;
+					// get the original address from the leaf node
+					bcopy(pageBuf + AM_sl + numElts * recSize + attributeLength + AM_ss, &address1, AM_si);
+
+					// copy the two pointers
+					bcopy((char*)&address1, tempBuf1 + lastAddressinPage + AM_sb, AM_si);
+					bcopy((char*)&ptr, tempBuf1 + lastAddressinPage + AM_sb + AM_si, AM_si);
+
+					lastAddressinPage = lastAddressinPage + AM_sb + AM_si*2;
+					bcopy((char*)&lastAddressinPage, tempBuf1, AM_si);					
+
+					// update the leaf node
+					bcopy((char*)bagPage, pageBuf + AM_sl + numElts*recSize + attributeLength, AM_si);
+					bcopy((char*)&pntr, pageBuf + AM_sl + numElts*recSize + attributeLength + AM_si, AM_si);
+					short single1 = 0;
+					bcopy((char*)&single1, pageBuf + AM_sl + numElts*recSize + attributeLength + 2*AM_si, AM_ss);
 
 					return TRUE;
 				}
 			}
 		}
 		else{
+			printf("Omega33 %s\n", value);
 			// element not present before
 			// this element is being inserted for the first time
 			if(PF_PAGE_SIZE - header->keyPtr < recSize){
@@ -213,22 +349,24 @@ int * buff_access;
 			}
 			else{
 				// space is available
-				bcopy(pageBuf, (char*)header, AM_sl);
-
+				printf("Omega44 %s\n", value);
 				header->keyPtr = header->keyPtr + recSize;
-				header->numKeys = 1;
+				header->numKeys++;
 
+				int offset = AM_sl + numElts*recSize;
 				// insert the key value into the node
-				int offset =  AM_sl + recSize;
 				bcopy(value, pageBuf + offset, attributeLength);
-
+				
 				//for now point to some random location as key = record value
-				ptr = -1;
-				bcopy((char*)&ptr, pageBuf + offset + attributeLength, AM_si);
 				// ptr = address of entry
+				ptr = 17;
+				bcopy((char*)&ptr, pageBuf + offset + attributeLength, AM_si);
+				
+				// this entry may or may not be there
 				bcopy((char*)&ptr, pageBuf + offset + attributeLength + AM_si, AM_si);
+				
 				short single = 1;
-				bcopy((char*)&single, pageBuf + offset + attributeLength + AM_si, AM_ss);
+				bcopy((char*)&single, pageBuf + offset + attributeLength + AM_si*2, AM_ss);
 				
 				// write the header back onto the page
 				bcopy((char*)header, pageBuf, AM_sl);
@@ -515,7 +653,8 @@ int *length;/*Length of rightmost_page and rightmost_buf array*/
 }
 
 
-InsertEntry(fileDesc,attrType,attrLength,value,recId,last,buff_hits,num_nodes,buff_access)
+InsertEntry(temp, fileDesc,attrType,attrLength,value,recId,last,buff_hits,num_nodes,buff_access)
+int *temp; // current bag page number
 int fileDesc; /* file Descriptor */
 char attrType; /* 'i' or 'c' or 'f' */
 int attrLength; /* 4 for 'i' or 'f', 1-255 for 'c' */
@@ -535,14 +674,16 @@ int * buff_access;
     if(length==0){
         length++;
         errVal=PF_GetFirstPage(fileDesc,&pageNum,&pageBuf,buff_hits);
+        printf("POPOP1 %d\n", pageNum);
         AM_Check;
         rightmost_page[0]=pageNum;
         rightmost_buf[0]=pageBuf;
     }
-    int temp;
+    
     int isInserted= InsertintoLeaf(fileDesc, &temp, rightmost_buf[0],attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
     if(isInserted==TRUE){
         //done
+
         if(last==1){
             for(int i=0;i<length;i++)
             {
@@ -554,12 +695,14 @@ int * buff_access;
         }
     }
     else if(isInserted==FALSE){
-
+printf("POPOP %d\n", rightmost_page[0]);
         /* Create a new leafnode*/
         char *tempPageBuf,*tempPageBuf1; /*Stores the buffer location of newly allocated page*/
         int tempPageNum,tempPageNum1;/* Stores the page number of newly allocated page*/
         AM_LEAFHEADER *tempheader;//To store the header of newly allocated page
-
+        
+        PF_UnfixPage(fileDesc,rightmost_page[0], TRUE);
+printf("POPOP\n");
         errVal = PF_AllocPage(fileDesc,&tempPageNum,&tempPageBuf);
         AM_Check;
         (*num_nodes)++;
@@ -573,7 +716,10 @@ int * buff_access;
         tempheader->keyPtr = AM_sl;
         tempheader->freeListPtr = AM_NULL;
         tempheader->attrLength = attrLength;
-        tempheader->maxKeys = (PF_PAGE_SIZE - AM_sint - AM_si)/(AM_si + attrLength);
+        tempheader->maxKeys = (PF_PAGE_SIZE - AM_sl)/(attrLength + 2*AM_si + AM_ss);
+        printf("Max %d\n", tempheader->maxKeys);
+
+
 
 
         /* copy the header onto the page */
@@ -582,6 +728,7 @@ int * buff_access;
         bcopy(rightmost_buf[0],tempheader,AM_sl);
         tempheader->nextLeafPage = tempPageNum;
         bcopy(tempheader,rightmost_buf[0],AM_sl);
+        rightmost_page[0] = tempPageNum;
 
         /*Insert the value to newly created leaf node*/
         InsertintoLeaf(fileDesc, &temp, tempPageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
@@ -672,6 +819,7 @@ main()
     /* init */
     //printf("initializing\n");
     PF_Init();
+    
     /* create index */
     //printf("creating index\n");
     AM_CreateIndex(RELNAME,0,INT_TYPE,sizeof(int));
@@ -682,25 +830,29 @@ main()
     fd = PF_OpenFile(fname);
     //printf("fd is %d \n",fd);
     //printf("inserting into index\n");
-    for (recnum=0; recnum < 15; recnum++)
+    int N = 1000;
+    int temp;
+    for (recnum=0; recnum < N; recnum++)
     {
-        if(recnum<14)
+    	printf("Num: %d\n", recnum);
+        if(recnum<N-1)
         {
 
-            InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&recnum,
+            InsertEntry(temp,fd,INT_TYPE,sizeof(int),(char *)&recnum,
             recnum,0,buff_hits,num_nodes,buff_access);
 
         }
         else
         {
 
-            InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&recnum,
+            InsertEntry(temp,fd,INT_TYPE,sizeof(int),(char *)&recnum,
             recnum,1,buff_hits,num_nodes,buff_access);
 
         }
     }
 
-    AM_PrintTree(fd, AM_RootPageNum, INT_TYPE);
+    // AM_PrintTree(fd, AM_RootPageNum, INT_TYPE);
+    //OurPrintTree(fd, AM_RootPageNum, 'i');
     xPF_CloseFile(fd);
     xAM_DestroyIndex(RELNAME,0);
     printf("test done!\n");
@@ -711,5 +863,7 @@ main()
         printf("Number of Read Access = %i\n", nReadTransfers);
         //printf("Number of Write Seeks = %i\n", nWriteSeeks);
         printf("Number of Write Access = %i\n", nWriteTransfers);
+
+
 
 }

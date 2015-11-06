@@ -9,10 +9,10 @@ pflayer.o: $(OBJ)
 tests: testhash testpf
 
 testpf: testpf.o pflayer.o
-	cc -o testpf testpf.o pflayer.o
+	cc -w -o testpf testpf.o pflayer.o
 
 testhash: testhash.o pflayer.o
-	cc -o testhash testhash.o pflayer.o
+	cc -w -o testhash testhash.o pflayer.o
 
 $(OBJ): $(HDR)
 
@@ -25,3 +25,5 @@ lint:
 
 install: pflayer.o 
 
+clean:
+	rm *.o

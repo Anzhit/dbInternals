@@ -32,7 +32,7 @@
 
 
 /* page size */
-#define PF_PAGE_SIZE	64
+#define PF_PAGE_SIZE	1000
 
 #define MAXATTRSIZE 512
 #define ATTRSIZE 11

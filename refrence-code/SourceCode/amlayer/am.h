@@ -19,6 +19,14 @@ typedef struct am_intheader
 		short attrLength;
 	}	AM_INTHEADER ; /* Header for an internal node */
 
+typedef struct am_bagheader{
+	short numKeys;
+	short lastPtr;
+	short nextPageNum;
+}	AM_BAGHEADER ; 
+
+# define AM_sb sizeof(AM_BAGHEADER)
+
 extern int AM_RootPageNum; /* The page number of the root */
 extern int AM_LeftPageNum; /* The page Number of the leftmost leaf */
 extern int AM_Errno; /* last error in AM layer */
