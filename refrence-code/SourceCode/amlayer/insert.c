@@ -4,123 +4,7 @@
 #include "testam.h"
 
 //if print_check is 1 print the tree else do not
-int print_check =1;
-
-
-
-/* Inserts a key into a leaf node */
-// InsertintoLeaf(pageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access)
-// char *pageBuf;/* buffer where the leaf page resides */
-// int attrLength;
-// char attrType;
-// char *value;/* attribute value to be inserted*/
-// int recId;/* recid of the attribute to be inserted */
-// int *buff_hits;
-// int * num_nodes;
-// int * buff_access;
-// {
-// 	 int recSize;
-// 	 char tempPage[PF_PAGE_SIZE];
-// 	 AM_LEAFHEADER head,*header;
-// 	 int errVal;
-// 	 int high;
-// 	 int compareVal; /* result of comparison of key with value */
-// 	 int index; /*index where key is to be inserted*/
-// 	 short tempPtr;
-// 	 short oldhead;
-// 	 //printf("Insert into leaf called");
-// 	 /* initialise the header */
-// 	 header = &head;
-// 	 bcopy(pageBuf,(char*) header,AM_sl);
-// 	 ////////
-// 	 high = header->numKeys;
-// 	 index=high+1;
-// 	 recSize = header->attrLength + AM_ss;
-// 	 /* The leaf is Empty */
-// 	 if (high == 0)
-// 	 {
-// 	 	printf("%d\n", header->recIdPtr);
-// 		 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
-// 		 tempPtr = header->recIdPtr;
-// 		 recSize = header->attrLength + AM_ss;
-// 		 /* Update the header */
-// 		 header->keyPtr = header->keyPtr + recSize;
-// 		 /* copy the new key */
-// 		 bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
-// 		 /* Set the head of recId list to the new recid to be added */
-// 		 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
-// 		 header->attrLength,AM_ss);
-// 		 /* Copy the recId*/
-// 		 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
-// 		 header->numKeys++;
-// 		 bcopy((char*) header,pageBuf,AM_sl);
-// 		 return(TRUE);
-// 	 }
-// 	 else
-// 	 {
-// 		 /* compare value with the last inserted key */
-// 		 compareVal = AM_Compare(pageBuf + AM_sl + (high - 1)*recSize,
-// 		 attrType,attrLength,value);
-// 		 if(compareVal==0)
-// 		 {
-// 			 /* key is already present */
-// 			 if ((header->recIdPtr - header->keyPtr) <(AM_si + AM_ss))
-// 			 {
-// 				 /* no room for one more record */
-// 				 //printf("no space in leaf\n");
-// 				 return(FALSE);
-// 			 }
-// 			 else
-// 			 {
-// 				 recSize = header->attrLength + AM_ss;
-// 				 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
-// 				 tempPtr = header->recIdPtr;
-// 				 /* save  the old head of recId list */
-// 				 bcopy(pageBuf+AM_sl+(index-1)*recSize + header->attrLength,
-// 				 (char *)&oldhead, AM_ss);
-// 				 /* Update the head of recId list to the new recid to be added */
-// 				 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
-// 				 header->attrLength,AM_ss);
-// 				 /* Copy the recId*/
-// 				 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
-// 				 /* make the old head of list the second on list */
-// 				 bcopy((char *)&oldhead,pageBuf + tempPtr+AM_si,AM_ss);
-// 				 bcopy((char*) header,pageBuf,AM_sl);
-// 				 return (TRUE);
-// 			 }
-// 		 }
-// 		 else
-// 		 {
-// 			 /*key is not already present */
-// 			 if ((header->recIdPtr - header->keyPtr) < (AM_si + AM_ss + recSize))
-// 			 {
-// 				 //No space available
-// 				 return(FALSE);
-// 			 }
-// 			 else
-// 			 {
-// 				 //Space is available
-// 				 header->recIdPtr = header->recIdPtr - AM_si - AM_ss;
-// 				 tempPtr = header->recIdPtr;
-// 				 recSize = header->attrLength + AM_ss;
-// 				 /* Update the header */
-// 				 header->keyPtr = header->keyPtr + recSize;
-// 				 /* copy the new key */
-// 				 bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
-// 				 /* Set the head of recId list to the new recid to be added */
-// 				 bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize +
-// 				 header->attrLength,AM_ss);
-// 				 /* Copy the recId*/
-// 				 bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
-// 				 header->numKeys++;
-// 				 //printf("recid added is %d \n",recId);
-// 				 bcopy((char*) header,pageBuf,AM_sl);
-// 				 return(TRUE);
-// 			 }
-// 		 }
-// 	 }
-// 	 ////////
-// }
+int print_check =0;
 
 typedef struct am_bagheader{
 	short numKeys;
@@ -503,7 +387,8 @@ int * buff_hits;
     }
 
 }
-AddtoParent(fileDesc,level,rightmost_page,rightmost_buf,value,attrLength, length,buff_hits,num_nodes,buff_access)
+
+AddtoParent(fileDesc,level,rightmost_page,rightmost_buf,value,attrLength,buff_hits,num_nodes,buff_access,length)
 int fileDesc;
 int level;/*Level at which the node which has to be added to parent is present*/
 int *rightmost_page;
@@ -516,124 +401,120 @@ int * num_nodes;
 int * buff_access;
 int *length;/*Length of rightmost_page and rightmost_buf array*/
 {
-    //printf(" @# %d \n", *length);
-    int pageNum;/*Page number to be added to the parent*/
-    char tempPage[PF_PAGE_SIZE];/* temporary page for manipulating page */
-    int pageNumber; /* pageNumber of parent to which key is to be added-
-    got from stack*/
-    int offset; /* Place in parent where key is to be added -
-    got from stack*/
     int errVal;
-    int pageNum1,pageNum2; /* pagenumber of new pages to be allocated */
-    int tempPageNumber;
-    char *tempPagebuffer;
-    char *pageBuf,*pageBuf1,*pageBuf2;
-    AM_INTHEADER head,*header;
-    AM_INTHEADER temphead,*tempheader;
-    int recSize;
-    char *tempval;
-    //printf("Add to parent called \n");
-    pageNum=rightmost_page[level];
-    /* Get the parent node buffer pointer*/
-    pageBuf=rightmost_buf[level+1];
-    /* Get the parent node page number*/
-    pageNumber=rightmost_page[level+1];
-    /* initialise header */
+
+    /*Page number of page to be added*/
+    int pageNum = rightmost_page[level];
+    /*Page number of parent page to which pageNum has to be added*/
+    int parentPageNum = rightmost_page[level+1];
+    /*Page buffer of parent page*/
+    char* parentPageBuf = rightmost_buf[level+1];
+    AM_INTHEADER head, *header;
+
+    /*Initialise header */
     header = &head;
-    tempheader=&temphead;
+
     /* copy the header from buffer */
-    bcopy(pageBuf,header,AM_sint);
-    tempval=(char *)malloc(header->attrLength);
-    recSize = header->attrLength + AM_si;
-    //printf("parent header numkeys %d \n",header->numKeys);
-    /* check if there is room in this node for another key */
-    if ((header->numKeys) < (header->maxKeys))
-    {
-        //printf("%d \n",header->numKeys);
-        //printf("%d \n",header->maxKeys);
-        //printf("If block entered \n");
-        /* add the attribute value to the node */
-        AM_AddtoIntPage(pageBuf,value,pageNum,header,header->numKeys);
-        rightmost_buf[level+1]=pageBuf;
-        /* copy the updated header into buffer*/
-        bcopy(header,pageBuf,AM_sint) ;
-        return(AME_OK);
+    bcopy(parentPageBuf, header, AM_sint);
+    int recSize = header->attrLength + AM_si;
+
+    if(header->numKeys < header->maxKeys){
+        AM_AddtoIntPage(parentPageBuf, value, pageNum, header, header->numKeys);
+        /*copy updated header to parentPageBuf*/
+        bcopy(header, parentPageBuf, AM_sint);
+        // NEXT LINE PROBABLY NOT REQUIRED 
+        rightmost_buf[level+1] = parentPageBuf;
+        return (AME_OK);
     }
-    else
-    {
-        /*Not sufficient space in parent node*/
-        //////////////////////////
-        /*Allocate a new page*/
-        //printf("Else block entered \n");
-        errVal = PF_AllocPage(fileDesc,&tempPageNumber,&tempPagebuffer);
-        AM_Check;
+    else{
+        int newPageNum;
+        char* newPageBuf;
+        errVal = PF_AllocPage(fileDesc, &newPageNum, &newPageBuf);
+        fprintf(stderr, "Something %d\n", newPageNum);
+        AM_Check; //check if there is no error in the PF layer functionality
+        AM_INTHEADER newhead, *newheader;
+        newheader = &newhead;
+
+
+        //NOTE: INCREMENT NUMBER OF NODES, IF MAINTAINED HERE
         (*num_nodes)++;
-        pageNum1= tempPageNumber;
-        pageBuf1=tempPagebuffer;
-        /*Set header for the new page*/
-        tempheader->pageType = header->pageType;
-        tempheader->attrLength = header->attrLength;
-        tempheader->maxKeys = header->maxKeys;
-        tempheader->numKeys=0;
-        bcopy(tempheader,pageBuf1,AM_sint);
-        /*Right most key of its left sibling has to be deleted*/
-        header->numKeys=header->numKeys -1;
-        bcopy(header,pageBuf,AM_sint) ;
-        /*Right most pointer of its left sibling has to added to this node*/
-        bcopy(pageBuf + AM_sint + (header->maxKeys)*recSize,pageBuf1+AM_sint,AM_si);
-        /*Add the value and recid to the newly created node*/
-        AM_AddtoIntPage(pageBuf1,value,pageNum,tempheader,tempheader->numKeys);
-        //printf("New value of numKeys is %d \n",tempheader->numKeys);
-        bcopy(tempheader,pageBuf1,AM_sint);
-        /*Set value= value to be added to the parent, that is the right most key of the left sibling*/
-        //printf("ghusa");
-        bcopy(pageBuf + AM_sint +  AM_si +(header->numKeys)*recSize,tempval,header->attrLength);
-        //printf("chala");
-        if (pageNumber == AM_RootPageNum)//DOUBT ADITYA NAMBIAR
-        {
-            /*New root has to be created*/
-            /* allocate a new page for a new root */
-            //printf("Crearing new root \n");
-            errVal = PF_AllocPage(fileDesc,&pageNum2,&pageBuf2);
+
+        /*Initialise newheader*/
+        newheader->pageType = header->pageType;
+        newheader->attrLength = header->attrLength;
+        newheader->maxKeys = header->maxKeys;
+        newheader->numKeys = 0;
+        bcopy(newheader, newPageBuf, AM_sint);
+
+        /*Right most key of parentPageBuf has to be deleted and put into the next node*/
+        header->numKeys = header->numKeys - 1;
+        bcopy(header, parentPageBuf, AM_sint);
+        /*For putting the correct pointer (of the lower level node) into the new node on the right*/
+        bcopy(parentPageBuf + AM_sint + recSize*(header->numKeys + 1), newPageBuf + AM_sint, AM_si);
+        /*Add value to this newly created parent*/
+        AM_AddtoIntPage(newPageBuf, value, pageNum, newheader, newheader->numKeys);
+        bcopy(newheader, newPageBuf, AM_sint);
+
+       //  /*value of key to be added to parent, i.e., value of rightmost key in left node*/
+        // char* val = (char*)malloc(header->attrLength);
+        // bcopy(parentPageBuf + AM_sint + (header->numKeys)*recSize + AM_si, val, header->attrLength);  
+            
+
+        if(parentPageNum == AM_RootPageNum){ // If a new root needs to be created
+            /*Allocate new root page*/
+            int newRootNum;
+            char* newRootBuf;
+            errVal = PF_AllocPage(fileDesc, &newRootNum, &newRootBuf);
+            fprintf(stderr, "Something1 %d\n", newRootNum);
             AM_Check;
+
+            // bcopy(parentPageBuf, newRootBuf, PF_PAGE_SIZE);
+
+            // AM_FillRootPage(parentPageBuf, newRootNum, newPageNum, value, header->attrLength, header->maxKeys);
+
+            //NOTE: INCREMENT NUMBER OF NODES, IF MAINTAINED, HERE
             (*num_nodes)++;
-            /* copy the left node to the new buffer space */
-            bcopy(pageBuf,pageBuf2,PF_PAGE_SIZE);
-            /* fill the header of new root page and the
-            attribute value */
-            AM_FillRootPage(pageBuf,pageNum2,pageNum1,tempval,
-            header->attrLength, header->maxKeys);
-            (*length)=(*length)+1;
-            /*Set the page number of newly created root node equal to the previous root node*/
-            rightmost_page[level+2]=rightmost_page[level+1];
-            rightmost_buf[level+2]=pageBuf;
-            /*Reset the rightmost entries for level+1*/
-            rightmost_page[level+1]=pageNum1;
-            rightmost_buf[level+1]=pageBuf1;
-            /*Unfix the left sibling of rightmost page at level+1*/
-            errVal = PF_UnfixPage(fileDesc,pageNum2,TRUE);
+            /*Fill in new root*/
+            AM_FillRootPage(newRootBuf, parentPageNum, newPageNum, value, header->attrLength, header->maxKeys);
+            fprintf(stderr, "NewRootNum : %d, newPageNum: %d, parentPageNum: %d \n", newRootNum, newPageNum, parentPageNum);
+
+            /*Modify rightmost buf and num arrays*/
+            (*length)++;
+
+            AM_RootPageNum = newRootNum;
+
+            rightmost_page[level+2] = AM_RootPageNum;
+            rightmost_buf[level+2] = newRootBuf;
+
+            /*level + 1 entries to be set to the newPageBuf and Num*/
+            rightmost_page[level+1] = newPageNum;
+            rightmost_buf[level+1] = newPageBuf;
+
+            /*Unfix left sibling of new page or left child of new root*/
+            errVal = PF_UnfixPage(fileDesc, parentPageNum, TRUE);
             AM_Check;
-            return(AME_OK);
+            return (AME_OK);
         }
-        else
-        {
-            /*No new root needs to be created*/
-            //printf("recursive call \n");
-            /*Unfix the left sibling of rightmost node at level+1*/
-            errVal = PF_UnfixPage(fileDesc,pageNumber,TRUE);
+        else{
+            /*level + 1 entries to be set to the newPageBuf and Num*/
+            rightmost_page[level+1] = newPageNum;
+            rightmost_buf[level+1] = newPageBuf;
+
+            /*Unfix left sibling of new page*/
+            errVal = PF_UnfixPage(fileDesc, parentPageNum, TRUE);
             AM_Check;
-            /*Set the new rightmost entries for level+1*/
-            rightmost_page[level+1]=pageNum1;
-            rightmost_buf[level+1]=pageBuf1;
-            /*Recursive call to add to parent*/
-            errVal=AddtoParent(fileDesc,level+1,rightmost_page,rightmost_buf,tempval,attrLength,length,buff_hits,num_nodes,buff_access);
-            AM_Check;
+            
+            errVal = AddtoParent(fileDesc, level+1, rightmost_page, rightmost_buf, value, attrLength, buff_hits, num_nodes, buff_access, length);
+            AM_Check;   
         }
-        /////////////////////////
+
+        
+
     }
-    return(AME_OK);
+    return (AME_OK);
 }
-/* Inserts a value,recId pair into the tree */
+
+
 InsertEntry(fileDesc,attrType,attrLength,value,recId,last,buff_hits,num_nodes,buff_access)
 int fileDesc; /* file Descriptor */
 char attrType; /* 'i' or 'c' or 'f' */
@@ -644,161 +525,98 @@ int last; /*Wheteher the value to be inserted is the last value*/
 int *buff_hits;
 int * num_nodes;
 int * buff_access;
-{
+{   
     char *pageBuf; /* buffer to hold page */
     int pageNum; /* page number of the page in buffer */
-    int index; /* index where key can be found or can be inserted */
-    int status; /* whether key is old or new */
-    int inserted; /* Whether key has been inserted into the leaf or
-    splitting is needed */
-    int addtoparent; /* Whether key has to be added to the parent */
     int errVal; /* return value of functions within this function */
-    char key[AM_MAXATTRLENGTH]; /* holds the attribute to be passed
-    back to the parent */
-    int tempPageNum,tempPageNum1;/* Stores the page number of newly allocated page*/
-    char *tempPageBuf,*tempPageBuf1; /*Stores the buffer location of newly allocated page*/
     static char *rightmost_buf[100000];
     static int rightmost_page[100000];
     static int length=0;
-    //printf("length is %d \n",length);
-    AM_LEAFHEADER temphead,*tempheader;//To store the header of newly allocated page
-    int i;//To be used in a loop
-    int maxKeys;
-    /* check the parameters */
-    if ((attrType != 'c') && (attrType != 'f') && (attrType != 'i'))
-    {
-        AM_Errno = AME_INVALIDATTRTYPE;
-        return(AME_INVALIDATTRTYPE);
-    }
-    if (value == NULL)
-    {
-        AM_Errno = AME_INVALIDVALUE;
-        return(AME_INVALIDVALUE);
-    }
-    if (fileDesc < 0)
-    {
-        AM_Errno = AME_FD;
-        return(AME_FD);
-    }
-    if(length==0)
-    {
-        errVal = PF_GetFirstPage(fileDesc,&pageNum,&pageBuf,buff_hits);
+    if(length==0){
+        length++;
+        errVal=PF_GetFirstPage(fileDesc,&pageNum,&pageBuf,buff_hits);
         AM_Check;
-        length=1;
-        rightmost_buf[0]=pageBuf;
         rightmost_page[0]=pageNum;
+        rightmost_buf[0]=pageBuf;
     }
-    /* Insert into leaf the key,recId pair */
-    inserted = InsertintoLeaf(rightmost_buf[0],attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
-    /* if key has been inserted then done */
-    if (inserted == TRUE)
-    {
-        //printf("Value inserted is %d \n",*((int*)value));
-        if(last==1)
-        {
-            //Unfix all pages
-            for(i=0;i<length;i++)
+    int temp;
+    int isInserted= InsertintoLeaf(fileDesc, &temp, rightmost_buf[0],attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
+    if(isInserted==TRUE){
+        //done
+        if(last==1){
+            for(int i=0;i<length;i++)
             {
                 errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
                 AM_Check;
             }
             if(print_check == 1)
-            Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
-            AM_EmptyStack();
-            return(AME_OK);
-        }
-        else
-        {
-            //More values to be inserted
+                Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
         }
     }
-    /* check if there is any error */
-    if (inserted < 0)
-    {
-        AM_EmptyStack();
-        AM_Errno = inserted;
-        return(inserted);
-    }
-    /* if not inserted then have to add another leaf node*/
-    if (inserted == FALSE)
-    {
-        //printf("Need to create new leaf node \n");
-        //Handle the case when leaf node is full
-        /////////
+    else if(isInserted==FALSE){
+
         /* Create a new leafnode*/
+        char *tempPageBuf,*tempPageBuf1; /*Stores the buffer location of newly allocated page*/
+        int tempPageNum,tempPageNum1;/* Stores the page number of newly allocated page*/
+        AM_LEAFHEADER *tempheader;//To store the header of newly allocated page
+
         errVal = PF_AllocPage(fileDesc,&tempPageNum,&tempPageBuf);
         AM_Check;
         (*num_nodes)++;
         /*Initialize the header of new leafnode*/
-        tempheader=&temphead;
+        tempheader=(AM_LEAFHEADER*)malloc(sizeof(AM_LEAFHEADER));
         tempheader->pageType = 'l';
+        tempheader->numKeys = 0;
+        tempheader->numinfreeList = 0;
         tempheader->nextLeafPage = AM_NULL_PAGE;
         tempheader->recIdPtr = PF_PAGE_SIZE;
         tempheader->keyPtr = AM_sl;
         tempheader->freeListPtr = AM_NULL;
-        tempheader->numinfreeList = 0;
         tempheader->attrLength = attrLength;
-        tempheader->numKeys = 0;
-        /* the maximum keys in an internal node- has to be even always*/
-        maxKeys = (PF_PAGE_SIZE - AM_sint - AM_si)/(AM_si + attrLength);
-        if (( maxKeys % 2) != 0)
-        tempheader->maxKeys = maxKeys - 1;
-        else
-        tempheader->maxKeys = maxKeys;
+        tempheader->maxKeys = (PF_PAGE_SIZE - AM_sint - AM_si)/(AM_si + attrLength);
+
+
         /* copy the header onto the page */
         bcopy(tempheader,tempPageBuf,AM_sl);
         /* Make the next leaf page pointer of previous page point to the newly created page*/
         bcopy(rightmost_buf[0],tempheader,AM_sl);
         tempheader->nextLeafPage = tempPageNum;
         bcopy(tempheader,rightmost_buf[0],AM_sl);
-        ////printf("leaf %d points to %d \n",rightmost_page[0],tempPageNum);
+
         /*Insert the value to newly created leaf node*/
-        //printf("attrLength sent to function %d \n",attrLength);
-        inserted = InsertintoLeaf(tempPageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
-        //printf("Value inserted is %d \n",*((int*)value));
-        //~ printf("Value of inserted when inserted to new leaf is %d \n",inserted);
-        if (inserted < 0)
-        {
-            AM_EmptyStack();
-            AM_Errno = inserted;
-            return(inserted);
-        }
+        InsertintoLeaf(fileDesc, &temp, tempPageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access);
+
         if(length==1)
         {
-            /*A new root node has to be created*/
-            /* the page being split is the root*/
-            /* Allocate a new page for another leaf as a new root has
-            to be created*/
+            //Allocate new page for root
             errVal = PF_AllocPage(fileDesc,&tempPageNum1,&tempPageBuf1);
             AM_Check;
-            (*num_nodes)++;
-            AM_LeftPageNum = tempPageNum1; /* this will remain the
-            leftmost page hence*/
-            /* copy the old leaf page left most page into a new page */
-            bcopy(rightmost_buf[0],tempPageBuf1,PF_PAGE_SIZE);
-            /* Initialise the new root page */
-            rightmost_buf[1]=rightmost_buf[0];
-            rightmost_page[1]=rightmost_page[0];
-            AM_FillRootPage(rightmost_buf[1],tempPageNum1,tempPageNum,value,
+            //Assign global Vars 
+            AM_LeftPageNum = rightmost_page[0];
+            AM_RootPageNum=tempPageNum1;
+            //Init Root
+            AM_FillRootPage(tempPageBuf1,rightmost_page[0],tempPageNum,value,
             tempheader->attrLength ,tempheader->maxKeys);
-            length=length+1;
+            length++;
+            (*num_nodes)++;
             /*unfix the left most leaf node*/
-            errVal = PF_UnfixPage(fileDesc,tempPageNum1,TRUE);
+            errVal = PF_UnfixPage(fileDesc,AM_LeftPageNum,TRUE);
             AM_Check;
+            //Assign new leaf to rightmost[0], root to rightmost[1]
             rightmost_page[0]=tempPageNum;
             rightmost_buf[0]=tempPageBuf;
-            //printf("%d \n",rightmost_page[0]);
+            rightmost_page[1]=tempPageNum1;
+            rightmost_buf[1]=tempPageBuf1;
             if(last==1)
-            {
-                
+            {   
                 //Unfix all pages
-                for(i=0;i<length;i++)
+                for(int i=0;i<length;i++)
                 {
                     errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
                     AM_Check;
                 }
                 if(print_check == 1)
-                Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
+                    Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
                 AM_EmptyStack();
                 return(AME_OK);
             }
@@ -810,35 +628,31 @@ int * buff_access;
             AM_Check;
             rightmost_page[0]=tempPageNum;
             rightmost_buf[0]=tempPageBuf;
-            errVal=AddtoParent(fileDesc,0,rightmost_page,rightmost_buf,value,attrLength,&length,buff_hits,num_nodes,buff_access);
-            if (errVal < 0)
-            {
-                AM_EmptyStack();
-                AM_Errno = errVal;
-                return(errVal);
-            }
+            errVal=AddtoParent(fileDesc,0,rightmost_page,rightmost_buf,value,attrLength,buff_hits,num_nodes,buff_access, &length);
+
             if(last==1)
             {
-                //Redistribute
-                
-                //Unfix all pages
-                for(i=0;i<length;i++)
+                //TODO Redistribute
+                for(int i=0;i<length;i++)
                 {
                     errVal = PF_UnfixPage(fileDesc,rightmost_page[i],TRUE);
                     AM_Check;
                 }
                 if(print_check == 1)
-                Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
-                AM_EmptyStack();
-                return(AME_OK);
+                    Print_check(fileDesc,rightmost_page,rightmost_buf,length,buff_hits);
             }
         }
-
-
+    }
+    if (errVal < 0)
+    {
+        AM_EmptyStack();
+        AM_Errno = errVal;
+        return(errVal);
     }
     AM_EmptyStack();
     return(AME_OK);
 }
+
 main()
 {
     int fd;    /* file descriptor for the index */
@@ -868,9 +682,9 @@ main()
     fd = PF_OpenFile(fname);
     //printf("fd is %d \n",fd);
     //printf("inserting into index\n");
-    for (recnum=0; recnum < 200; recnum++)
+    for (recnum=0; recnum < 15; recnum++)
     {
-        if(recnum<199)
+        if(recnum<14)
         {
 
             InsertEntry(fd,INT_TYPE,sizeof(int),(char *)&recnum,
@@ -886,6 +700,7 @@ main()
         }
     }
 
+    AM_PrintTree(fd, AM_RootPageNum, INT_TYPE);
     xPF_CloseFile(fd);
     xAM_DestroyIndex(RELNAME,0);
     printf("test done!\n");
