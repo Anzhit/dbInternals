@@ -1,0 +1,67 @@
+number of keys=200
+buffer size=20
+am.c ++
+test3 done!
+Statistics  
+Number of nodes created = 263
+Buffer hits 1075 
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 263
+Number of Write Transfers = 266
+time=3 ms
+
+
+
+
+
+number of keys=1000
+buffer size=20
+am.c ++
+test3 done!
+Statistics  
+Number of nodes created = 1328
+Buffer hits 6624 
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 1329
+Number of Write Transfers = 1331
+Time: 9ms
+
+number of keys=1000
+buffer size=6
+am.c ++
+test3 done!
+Statistics  
+Number of nodes created = 1328
+Buffer hits 4453 
+Number of Read Seeks = 2172
+Number of Read Transfers = 2172
+Number of Write Seeks = 1668
+Number of Write Transfers = 1680
+time=15 ms
+
+number of keys=1000
+buffer size=30
+am.c ++
+test3 done!
+Statistics  
+Number of nodes created = 1328
+Buffer hits 6624 
+Number of Read Seeks = 1
+Number of Read Transfers = 1
+Number of Write Seeks = 1329
+Number of Write Transfers = 1331
+time=10 ms
+
+number of keys=10000
+buffer size=10
+am.c ++
+test3 done!
+Statistics  
+Number of nodes created = 13328
+Buffer hits 81703 
+Number of Read Seeks = 674
+Number of Read Transfers = 674
+Number of Write Seeks = 13456
+Number of Write Transfers = 13458

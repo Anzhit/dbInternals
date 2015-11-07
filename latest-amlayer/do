@@ -1,0 +1,4 @@
+rm testrel.0
+make
+./bulk_loading.out
+#gwenview graph.png &

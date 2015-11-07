@@ -1,0 +1,49 @@
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	am.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	amfns.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	amsearch.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	aminsert.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	amstack.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	amglobals.c
+
+called: cc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	cc
+	-c
+	misc.c
+
+called: /usr/bin/gcc
+	/home/samarth/Desktop/CS387/dbInternals.git/trunk/refrence-code/SourceCode/amlayer
+	gcc
+	-std=c99
+	-c
+	insert.c
+

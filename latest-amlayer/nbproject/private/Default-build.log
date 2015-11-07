@@ -1,0 +1,318 @@
+cc -c am.c
+In file included from am.c:2:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+am.c: In function ‘AM_SplitLeaf’:
+am.c:36:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf,header,AM_sl);
+  ^
+am.c: In function ‘AM_AddtoParent’:
+am.c:152:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf,header,AM_sint);
+  ^
+am.c: In function ‘AM_AddtoIntPage’:
+am.c:246:3: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+   bcopy(pageBuf + AM_sint + (i-1)*recSize + AM_si,pageBuf + 
+   ^
+am.c: In function ‘AM_FillRootPage’:
+am.c:279:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy((char *)&pageNum1,pageBuf + AM_sint ,AM_si);
+  ^
+am.c: In function ‘AM_SplitIntNode’:
+am.c:311:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf + AM_sint,tempPage,length1);
+  ^
+am.c: At top level:
+am.c:346:1: warning: conflicting types for built-in function ‘bcopy’ [enabled by default]
+ bcopy(char* s1, char *s2, int nbytes)
+ ^
+am.c: In function ‘bcopy’:
+am.c:348:1: warning: incompatible implicit declaration of built-in function ‘memcpy’ [enabled by default]
+ memcpy(s2,s1,nbytes);
+ ^
+cc -c amfns.c
+In file included from amfns.c:3:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+amfns.c: In function ‘AM_CreateIndex’:
+amfns.c:80:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(header,pageBuf,AM_sl);
+  ^
+amfns.c: In function ‘AM_DeleteEntry’:
+amfns.c:183:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf,header,AM_sl);
+  ^
+cc -c amsearch.c
+In file included from amsearch.c:2:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+amsearch.c: In function ‘AM_Search’:
+amsearch.c:38:3: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+   bcopy(*pageBuf,lheader,AM_sl);
+   ^
+amsearch.c:45:3: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+   bcopy(*pageBuf,iheader,AM_sint);
+   ^
+amsearch.c:77:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(*pageBuf,lheader,AM_sl);
+    ^
+amsearch.c:84:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(*pageBuf,iheader,AM_sint);
+    ^
+amsearch.c: In function ‘AM_BinSearch’:
+amsearch.c:130:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(pageBuf + AM_sint + mid*recSize,(char *)&pageNum,
+    ^
+amsearch.c:143:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(pageBuf+AM_sint+(low-1)*recSize,(char *)&pageNum,
+    ^
+amsearch.c:150:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(pageBuf+AM_sint+low*recSize,(char *)&pageNum,
+    ^
+amsearch.c:160:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(pageBuf+AM_sint+(low-1)*recSize,(char *)&pageNum,
+    ^
+amsearch.c:169:5: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+     bcopy(pageBuf+AM_sint+low*recSize,
+     ^
+amsearch.c:176:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(pageBuf+AM_sint+(low+1)*recSize,(char *)&pageNum,
+    ^
+amsearch.c: In function ‘AM_Compare’:
+amsearch.c:315:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(bufPtr,(char *)&bufint,AM_si);
+    ^
+amsearch.c:323:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+    bcopy(bufPtr,(char *)&buffloat,AM_sf);
+    ^
+cc -c aminsert.c
+In file included from aminsert.c:2:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+aminsert.c: In function ‘AM_InsertintoLeaf’:
+aminsert.c:23:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf,header,AM_sl);
+  ^
+aminsert.c: In function ‘AM_InsertToLeafFound’:
+aminsert.c:107:3: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+   bcopy(pageBuf + tempPtr + AM_si,(char *)&(header->freeListPtr)
+   ^
+aminsert.c:112:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(pageBuf+AM_sl+(index-1)*recSize + header->attrLength,
+  ^
+aminsert.c: In function ‘AM_InsertToLeafNotFound’:
+aminsert.c:144:4: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+   {bcopy(pageBuf+AM_sl+(i-1)*recSize,pageBuf+AM_sl+i*recSize,recSize);
+    ^
+aminsert.c:150:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
+  ^
+aminsert.c: In function ‘AM_Compact’:
+aminsert.c:182:2: warning: incompatible implicit declaration of built-in function ‘bcopy’ [enabled by default]
+  bcopy(header,tempheader,AM_sl);
+  ^
+cc -c amstack.c
+In file included from amstack.c:2:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+cc -c amglobals.c
+In file included from amglobals.c:1:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+cc -c misc.c
+In file included from misc.c:4:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+misc.c: In function ‘padstring’:
+misc.c:16:10: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+  for (i= strlen(str)+1, str= str+i; i < length; i++, str++)
+          ^
+misc.c: In function ‘xAM_CreateIndex’:
+misc.c:30:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_CreateIndex(%s,%d,'%c',%d) failed: %d\n",
+   ^
+misc.c:32:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_DestroyIndex’:
+misc.c:44:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_DestroyIndex(%s,%d) failed: %d\n",fname,indexno,errval);
+   ^
+misc.c:45:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_InsertEntry’:
+misc.c:61:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_InsertEntry(%d,'%c',%d,val,%d) failed: %d\n",
+   ^
+misc.c:63:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_DeleteEntry’:
+misc.c:78:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_DeleteEntry(%d,'%c',%d,val,%d) failed: %d\n",
+   ^
+misc.c:80:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_OpenIndexScan’:
+misc.c:96:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_OpenIndexScan(%d,'%c',%d,%d,rec) failed: %d\n",
+   ^
+misc.c:98:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_FindNextEntry’:
+misc.c:111:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_FindNextEntry(%d) failed: %d\n",sd,errval);
+   ^
+misc.c:112:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xAM_CloseIndexScan’:
+misc.c:124:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("AM_CloseIndexScan(%d) failed:%d\n",sd,errval);
+   ^
+misc.c:125:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xPF_OpenFile’:
+misc.c:136:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("PF_OpenFile(%s) failed: %d\n",errval);
+   ^
+misc.c:136:3: warning: format ‘%s’ expects argument of type ‘char *’, but argument 2 has type ‘int’ [-Wformat=]
+misc.c:136:3: warning: format ‘%d’ expects a matching ‘int’ argument [-Wformat=]
+misc.c:137:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+misc.c: In function ‘xPF_CloseFile’:
+misc.c:148:3: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+   printf("PF_CloseFile(%d) failed: %d\n",fd,errval);
+   ^
+misc.c:149:3: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+   exit(1);
+   ^
+c99 -c insert.c
+In file included from insert.c:3:0:
+am.h:25:14: warning: conflicting types for built-in function ‘calloc’ [enabled by default]
+ extern char *calloc();
+              ^
+am.h:26:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+insert.c:18:1: warning: return type defaults to ‘int’ [enabled by default]
+ InsertintoLeaf(fd,bagPage,pageBuf,attrLength,attrType,value,recId,buff_hits,num_nodes,buff_access)
+ ^
+insert.c: In function ‘InsertintoLeaf’:
+insert.c:34:2: warning: implicit declaration of function ‘bcopy’ [-Wimplicit-function-declaration]
+  bcopy(pageBuf, (char*)header, AM_sl);
+  ^
+insert.c:76:3: warning: implicit declaration of function ‘strcmp’ [-Wimplicit-function-declaration]
+   int present = strcmp(value, lastVal);
+   ^
+insert.c:102:5: warning: passing argument 3 of ‘PF_GetThisPage’ from incompatible pointer type [enabled by default]
+     PF_GetThisPage(fd, bagPageNum, &tempBuf, buff_hits);
+     ^
+In file included from insert.c:2:0:
+pf.h:56:5: note: expected ‘char **’ but argument is of type ‘char (*)[64]’
+ int PF_GetThisPage(int fd, int pagenum,char **pagebuf,int* buff_hits);
+     ^
+insert.c:110:25: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+      bcopy((char*)&ptr, (char*)bagHeader->lastPtr, AM_si);
+                         ^
+insert.c:123:6: warning: passing argument 3 of ‘PF_AllocPage’ from incompatible pointer type [enabled by default]
+      PF_AllocPage(fd, &bagPageNum, &tempBuf1);
+      ^
+In file included from insert.c:2:0:
+pf.h:58:5: note: expected ‘char **’ but argument is of type ‘char (*)[64]’
+ int PF_AllocPage(int fd, int *pagenum,char **pagebuf);
+     ^
+insert.c:149:5: warning: passing argument 3 of ‘PF_GetThisPage’ from incompatible pointer type [enabled by default]
+     PF_GetThisPage(fd, *bagPage, &tempBuf, buff_hits);
+     ^
+In file included from insert.c:2:0:
+pf.h:56:5: note: expected ‘char **’ but argument is of type ‘char (*)[64]’
+ int PF_GetThisPage(int fd, int pagenum,char **pagebuf,int* buff_hits);
+     ^
+insert.c:163:6: warning: passing argument 3 of ‘PF_AllocPage’ from incompatible pointer type [enabled by default]
+      PF_AllocPage(fd, &bagPageNum, &tempBuf1);
+      ^
+In file included from insert.c:2:0:
+pf.h:58:5: note: expected ‘char **’ but argument is of type ‘char (*)[64]’
+ int PF_AllocPage(int fd, int *pagenum,char **pagebuf);
+     ^
+insert.c:219:17: error: ‘tempPtr’ undeclared (first use in this function)
+                 tempPtr = header->recIdPtr;
+                 ^
+insert.c:219:17: note: each undeclared identifier is reported only once for each function it appears in
+insert.c:224:44: error: ‘index’ undeclared (first use in this function)
+                 bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
+                                            ^
+insert.c: At top level:
+insert.c:270:1: warning: return type defaults to ‘int’ [enabled by default]
+ Print_check(fd,rightmost_page,rightmost_buf,length,buff_hits)
+ ^
+insert.c:418:1: warning: return type defaults to ‘int’ [enabled by default]
+ AddtoParent(fileDesc,level,rightmost_page,rightmost_buf,value,attrLength,buff_hits,num_nodes,buff_access,length)
+ ^
+insert.c: In function ‘AddtoParent’:
+insert.c:449:9: warning: implicit declaration of function ‘AM_AddtoIntPage’ [-Wimplicit-function-declaration]
+         AM_AddtoIntPage(parentPageBuf, value, pageNum, header, header->numKeys);
+         ^
+insert.c:505:13: warning: implicit declaration of function ‘AM_FillRootPage’ [-Wimplicit-function-declaration]
+             AM_FillRootPage(newRootBuf, parentPageNum, newPageNum, value, header->attrLength, header->maxKeys);
+             ^
+insert.c: At top level:
+insert.c:545:1: warning: return type defaults to ‘int’ [enabled by default]
+ InsertEntry(fileDesc,attrType,attrLength,value,recId,last,buff_hits,num_nodes,buff_access)
+ ^
+insert.c: In function ‘InsertEntry’:
+insert.c:647:17: warning: implicit declaration of function ‘AM_EmptyStack’ [-Wimplicit-function-declaration]
+                 AM_EmptyStack();
+                 ^
+insert.c: At top level:
+insert.c:683:1: warning: return type defaults to ‘int’ [enabled by default]
+ main()
+ ^
+insert.c: In function ‘main’:
+insert.c:704:5: warning: implicit declaration of function ‘AM_CreateIndex’ [-Wimplicit-function-declaration]
+     AM_CreateIndex(RELNAME,0,INT_TYPE,sizeof(int));
+     ^
+insert.c:730:5: warning: implicit declaration of function ‘AM_PrintTree’ [-Wimplicit-function-declaration]
+     AM_PrintTree(fd, AM_RootPageNum, INT_TYPE);
+     ^
+insert.c:731:5: warning: implicit declaration of function ‘xPF_CloseFile’ [-Wimplicit-function-declaration]
+     xPF_CloseFile(fd);
+     ^
+insert.c:732:5: warning: implicit declaration of function ‘xAM_DestroyIndex’ [-Wimplicit-function-declaration]
+     xAM_DestroyIndex(RELNAME,0);
+     ^
+make: *** [insert.o] Error 1
